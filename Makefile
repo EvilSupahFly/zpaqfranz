@@ -63,7 +63,6 @@ STRIP   ?= $(CROSS_COMPILE)strip
 
 # Program details
 PROG    := zpaqfranz
-ALTNAME := dir
 SOURCE  := zpaqfranz.cpp
 
 # Download URLs
@@ -179,12 +178,6 @@ install: build
 	cp $(PROG) $(DESTDIR)$(BINDIR)/$(PROG)
 	chmod 0755 $(DESTDIR)$(BINDIR)/$(PROG)
 	-$(STRIP) $(DESTDIR)$(BINDIR)/$(PROG) 2>/dev/null || true
-	@if [ ! -e $(DESTDIR)$(BINDIR)/$(ALTNAME) ] && [ ! -L $(DESTDIR)$(BINDIR)/$(ALTNAME) ]; then \
-		echo "Creating symbolic link $(DESTDIR)$(BINDIR)/$(ALTNAME)"; \
-		$(LN) $(PROG) $(DESTDIR)$(BINDIR)/$(ALTNAME); \
-	else \
-		echo "$(ALTNAME) already exists, skipping"; \
-	fi
 
 install-clean: install clean
 	@echo "Installed and local binary cleaned"
@@ -195,12 +188,6 @@ install-nointel: clean build install
 
 uninstall:
 	$(RM) $(DESTDIR)$(BINDIR)/$(PROG)
-	@if [ -L $(DESTDIR)$(BINDIR)/$(ALTNAME) ]; then \
-		echo "Removing symbolic link $(DESTDIR)$(BINDIR)/$(ALTNAME)"; \
-		$(RM) $(DESTDIR)$(BINDIR)/$(ALTNAME); \
-	else \
-		echo "$(ALTNAME) not found, skipping"; \
-	fi
 
 # Download helper
 _do_download:
