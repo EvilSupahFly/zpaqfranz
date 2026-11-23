@@ -44,7 +44,7 @@ jobs:
           repository: fcorbelli/zpaqfranz
           ref: ${{ needs.check.outputs.tag }}
           path: src
-      - run: sudo apt-get update && sudo apt-get install -y debhelper g++ make devscripts
+      - run: sudo apt-get update && sudo apt-get install -y debhelper devscripts build-essential
       - name: Overlay and build
         run: |
           v="${{ needs.check.outputs.tag }}"
@@ -52,6 +52,13 @@ jobs:
           cd src
           dch --create -v "${v}-0~local1" --package zpaqfranz -D noble "Automated build of upstream ${v}"
           dpkg-buildpackage -us -uc -b
+      - name: Check package contents
+        run: |
+          dpkg-deb -c ./zpaqfranz_*_amd64.deb
+          if dpkg-deb -c ./zpaqfranz_*_amd64.deb | grep -E ' \./usr/(local/)?bin/dir( ->|$)'; then
+            echo "Package ships a 'dir' file or symlink; this conflicts with coreutils" >&2
+            exit 1
+          fi
       - name: Smoke test
         run: |
           sudo dpkg -i ./zpaqfranz_*_amd64.deb
