@@ -1,4 +1,4 @@
-[![Track upstream release and build .deb](https://github.com/EvilSupahFly/zpaqfranz/actions/workflows/build-dep.yml/badge.svg)](https://github.com/EvilSupahFly/zpaqfranz/actions/workflows/build-dep.yml)
+[![Track upstream release and build .deb](https://github.com/EvilSupahFly/zpaqfranz/actions/workflows/build-deb.yml/badge.svg)](https://github.com/EvilSupahFly/zpaqfranz/actions/workflows/build-deb.yml)
 
 ## Installing the built packages
 
