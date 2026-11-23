@@ -60,9 +60,11 @@ jobs:
             exit 1
           fi
       - name: Smoke test
+        env:
+          TAG: ${{ needs.check.outputs.tag }}
         run: |
           sudo dpkg -i ./zpaqfranz_*_amd64.deb
-          zpaqfranz | head -n 5
+          zpaqfranz | head -n 1 | grep -F "v${TAG}"
           dpkg -L zpaqfranz
       - uses: softprops/action-gh-release@v3
         with:

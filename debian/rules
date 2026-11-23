@@ -3,6 +3,7 @@
 	dh $@
 
 override_dh_auto_build:
+	rm -f zpaqfranz
 	dh_auto_build -- CXXFLAGS="$$(dpkg-buildflags --get CXXFLAGS) -O3"
 
 override_dh_auto_install:
