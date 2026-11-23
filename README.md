@@ -13,12 +13,12 @@ files attached - no need to build locally to use this.
    **apt** (recommended - resolves dependencies across the whole batch of local
    files in one transaction):
     ```bash
-       sudo apt install ./zpaqfranz_XX.YY-0~local1_amd64.deb
+       sudo apt install ./zpaqfranz_XX.YY-0.local1_amd64.deb
     ```
 
     **dpkg**, classic two-step (what this build was actually validated with):
     ```bash
-       sudo dpkg -i zpaqfranz_XX.YY-0~local1_amd64.deb
+       sudo dpkg -i zpaqfranz_XX.YY-0.local1_amd64.deb
        sudo apt-get install -f   # only if dpkg reports anything missing
     ```
 
@@ -32,9 +32,6 @@ files attached - no need to build locally to use this.
    package manager replaces the old files cleanly on its own. When instaling from a
    terminal, be sure to replace `XX.YY` in the instructions above with the actual
    version number of your download (ie 65.22).
-
-   Note that GitHub may rewrite the ~ in the asset filename as a . when it's uploaded,
-   so your downloaded file may be called `zpaqfranz_XX.YY-0.local1_amd64.deb` instead.
 
 ## Important note about this auto-build project
 
