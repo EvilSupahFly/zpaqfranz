@@ -45,6 +45,14 @@ jobs:
           ref: ${{ needs.check.outputs.tag }}
           path: src
       - run: sudo apt-get update && sudo apt-get install -y debhelper devscripts build-essential
+      - name: Fetch release source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          gh release download "$TAG" -R fcorbelli/zpaqfranz -p zpaqfranz.cpp -D src --clobber
+          grep -m1 '#define ZPAQ_VERSION' src/zpaqfranz.cpp
+          grep -q "#define ZPAQ_VERSION \"${TAG}" src/zpaqfranz.cpp
       - name: Overlay and build
         run: |
           v="${{ needs.check.outputs.tag }}"
