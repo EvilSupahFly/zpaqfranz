@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+	dh_auto_build -- CXXFLAGS="$$(dpkg-buildflags --get CXXFLAGS) -O3"
+
+override_dh_auto_install:
+	install -D -m 0755 zpaqfranz debian/zpaqfranz/usr/bin/zpaqfranz
+
+override_dh_auto_test:
+	@echo "skipping upstream autotest (slow); run 'zpaqfranz autotest -all' manually"

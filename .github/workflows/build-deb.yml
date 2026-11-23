@@ -1,0 +1,65 @@
+name: Track upstream release and build .deb
+
+on:
+  schedule:
+    - cron: '0 6 1,15 * *'  # twice monthly (1st & 15th, 06:00 UTC) - matches release cadence
+  workflow_dispatch:      # lets you trigger a run manually to test
+    inputs:
+      tag:
+        description: 'Force a specific upstream tag'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+      build: ${{ steps.v.outputs.build }}
+    steps:
+      - id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          up="$INPUT_TAG"
+          [ -z "$up" ] && up=$(gh api repos/fcorbelli/zpaqfranz/releases/latest --jq .tag_name)
+          mine=$(gh api repos/${{ github.repository }}/releases/latest --jq .tag_name 2>/dev/null || echo none)
+          echo "tag=$up" >> "$GITHUB_OUTPUT"
+          if [ "$up" != "$mine" ]; then echo "build=true" >> "$GITHUB_OUTPUT"; else echo "build=false" >> "$GITHUB_OUTPUT"; fi
+
+  build:
+    needs: check
+    if: needs.check.outputs.build == 'true'
+    runs-on: ubuntu-24.04
+    env:
+      DEBFULLNAME: Seann Giffin
+      DEBEMAIL: seann.giffin@gmail.com
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: fcorbelli/zpaqfranz
+          ref: ${{ needs.check.outputs.tag }}
+          path: src
+      - run: sudo apt-get update && sudo apt-get install -y debhelper g++ make devscripts
+      - name: Overlay and build
+        run: |
+          v="${{ needs.check.outputs.tag }}"
+          cp -r debian src/debian
+          cd src
+          dch --create -v "${v}-0~local1" --package zpaqfranz -D noble "Automated build of upstream ${v}"
+          dpkg-buildpackage -us -uc -b
+      - name: Smoke test
+        run: |
+          sudo dpkg -i ./zpaqfranz_*_amd64.deb
+          zpaqfranz | head -n 5
+          dpkg -L zpaqfranz
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.check.outputs.tag }}
+          body: "Unofficial .deb of upstream ${{ needs.check.outputs.tag }}: https://github.com/fcorbelli/zpaqfranz/releases/tag/${{ needs.check.outputs.tag }}"
+          files: ./zpaqfranz_*.deb
+          fail_on_unmatched_files: true
