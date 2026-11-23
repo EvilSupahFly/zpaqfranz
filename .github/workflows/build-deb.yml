@@ -59,13 +59,30 @@ jobs:
             echo "Package ships a 'dir' file or symlink; this conflicts with coreutils" >&2
             exit 1
           fi
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: deb-packages
+          path: zpaqfranz_*.deb
+          retention-days: 7
+
       - name: Smoke test
         env:
           TAG: ${{ needs.check.outputs.tag }}
         run: |
           sudo dpkg -i ./zpaqfranz_*_amd64.deb
-          zpaqfranz | head -n 1 | grep -F "v${TAG}"
+          command -v zpaqfranz
+          sha256sum /usr/bin/zpaqfranz
+          set +e
+          zpaqfranz > out.txt 2>&1
+          echo "exit status: $?"
+          head -n 3 out.txt | cat -A
+          strings /usr/bin/zpaqfranz | grep -m3 'ZPAQ\|65\.22\|63\.5'
+          set -e
+          grep -qF "v${TAG}" out.txt
           dpkg -L zpaqfranz
+
       - uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.check.outputs.tag }}
